@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEARVIO — AI Fashion Universe</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --acid:#c8ff00;--acid-d:#a8d900;--pink:#ff2d78;--cyan:#00e5ff;--orange:#ff6b35;
+  --black:#060606;--s1:#111;--s2:#181818;--white:#f5f2ee;
+  --muted:rgba(245,242,238,.46);--border:rgba(255,255,255,.09);
+  --fd:'Bebas Neue',cursive;--fu:'Space Grotesk',sans-serif;--fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:var(--fb);overflow-x:hidden;cursor:none;}
+
+/* ── CURSOR ── */
+#cur{width:12px;height:12px;background:var(--acid);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:difference;will-change:transform;}
+#cur-ring{width:38px;height:38px;border:1.5px solid rgba(200,255,0,.35);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:99998;transition:border-color .25s,width .2s,height .2s;}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+
+/* ── NAVBAR ── */
+.wv-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,6,.85);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);}
+.wv-logo{font-family:var(--fd);font-size:1.9rem;letter-spacing:.14em;color:var(--white);cursor:pointer;text-decoration:none;line-height:1;}
+.wv-logo span{color:var(--acid);}
+.wv-links{display:flex;gap:2rem;list-style:none;margin:0;padding:0;}
+.wv-links a{font-family:var(--fu);font-size:.78rem;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s;position:relative;padding-bottom:3px;}
+.wv-links a::after{content:'';position:absolute;bottom:0;left:0;right:100%;height:1.5px;background:var(--acid);transition:right .25s;}
+.wv-links a:hover{color:var(--white);}
+.wv-links a:hover::after{right:0;}
+.wv-actions{display:flex;align-items:center;gap:1rem;}
+.wv-cart{position:relative;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;border-radius:8px;transition:background .2s;}
+.wv-cart:hover{background:rgba(255,255,255,.06);}
+.cart-badge{position:absolute;top:2px;right:2px;background:var(--pink);color:#fff;font-family:var(--fu);font-size:.58rem;font-weight:700;width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.btn-acid{font-family:var(--fu);font-size:.8rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;background:var(--acid);color:#000!important;border:2px solid var(--acid);padding:.75rem 2rem;border-radius:6px;cursor:pointer;transition:transform .2s,box-shadow .25s,background .2s;white-space:nowrap;line-height:1;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
+.btn-acid:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(200,255,0,.3);background:var(--acid-d);border-color:var(--acid-d);}
+.btn-outline-wv{font-family:var(--fu);font-size:.8rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;background:transparent;color:var(--white)!important;border:2px solid rgba(245,242,238,.28);padding:.75rem 2rem;border-radius:6px;cursor:pointer;transition:border-color .2s,background .2s;white-space:nowrap;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
+.btn-outline-wv:hover{border-color:var(--white);background:rgba(255,255,255,.06);}
+.nav-wv-btn{font-family:var(--fu);font-size:.76rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;background:var(--acid);color:#000!important;border:2px solid var(--acid);padding:.52rem 1.3rem;border-radius:6px;cursor:pointer;transition:transform .2s,box-shadow .25s;white-space:nowrap;line-height:1;}
+.nav-wv-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(200,255,0,.28);}
+
+/* ── HERO ── */
+.hero-section{min-height:100vh;padding-top:68px;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.hero-bg-fx{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 55% at 68% 48%,rgba(200,255,0,.055) 0%,transparent 65%),radial-gradient(ellipse 50% 70% at 18% 78%,rgba(255,45,120,.04) 0%,transparent 55%);}
+.hero-grid-fx{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);background-size:56px 56px;animation:grid-scroll 22s linear infinite;}
+@keyframes grid-scroll{0%{transform:translateY(0)}100%{transform:translateY(56px)}}
+.hero-body{flex:1;display:flex;align-items:center;gap:2rem;padding:3rem 3rem 2rem;position:relative;z-index:2;}
+.hero-left{flex:1;min-width:0;}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.18);padding:.35rem 1rem;border-radius:20px;font-family:var(--fu);font-size:.72rem;font-weight:600;color:var(--acid);letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.8rem;animation:fadeUp .6s ease both;}
+.badge-dot{width:6px;height:6px;background:var(--acid);border-radius:50%;animation:blink 1.6s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-title{font-family:var(--fd);font-size:clamp(4.2rem,8.5vw,8.5rem);line-height:.92;letter-spacing:.04em;margin-bottom:1.4rem;animation:fadeUp .6s .08s ease both;}
+.hero-title .t2{color:var(--acid);display:block;}
+.hero-title .t3{color:transparent;-webkit-text-stroke:1.5px rgba(245,242,238,.2);display:block;}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.75;max-width:440px;margin-bottom:2.2rem;animation:fadeUp .6s .16s ease both;}
+.hero-btns{display:flex;flex-wrap:wrap;gap:.85rem;align-items:center;animation:fadeUp .6s .24s ease both;}
+.hero-stats-row{display:flex;flex-wrap:wrap;gap:2.5rem;padding:1.8rem 3rem;border-top:1px solid var(--border);position:relative;z-index:2;background:rgba(6,6,6,.6);}
+.stat-num{font-family:var(--fd);font-size:2.4rem;color:var(--white);line-height:1;}
+.stat-num em{color:var(--acid);font-style:normal;}
+.stat-lbl{font-family:var(--fu);font-size:.68rem;font-weight:500;color:rgba(245,242,238,.36);text-transform:uppercase;letter-spacing:.12em;margin-top:.3rem;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── 3D CUBE ── */
+.hero-right{flex:0 0 460px;display:flex;align-items:center;justify-content:center;animation:fadeUp .6s .1s ease both;}
+.scene-3d{width:320px;height:420px;perspective:950px;display:flex;align-items:center;justify-content:center;}
+.cube-float{animation:cfloat 6s ease-in-out infinite;}
+.cube-wrap{width:220px;height:300px;position:relative;transform-style:preserve-3d;animation:cube-rot 14s linear infinite;}
+@keyframes cube-rot{0%{transform:rotateY(0deg) rotateX(6deg)}100%{transform:rotateY(360deg) rotateX(6deg)}}
+@keyframes cfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+.face3d{position:absolute;width:200px;height:280px;backface-visibility:hidden;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.face3d:nth-child(1){transform:translateZ(112px);}
+.face3d:nth-child(2){transform:rotateY(120deg) translateZ(112px);}
+.face3d:nth-child(3){transform:rotateY(240deg) translateZ(112px);}
+.face3d-inner{width:100%;height:100%;display:flex;flex-direction:column;}
+.face3d-img{flex:1;object-fit:cover;width:100%;display:block;}
+.face3d-info{padding:.85rem 1rem;background:rgba(6,6,6,.95);border-top:1px solid rgba(255,255,255,.08);}
+.face3d-name{font-family:var(--fu);font-size:.75rem;font-weight:600;color:var(--white);margin-bottom:.2rem;}
+.face3d-price{font-family:var(--fu);font-size:.85rem;color:var(--acid);font-weight:700;}
+
+/* ── MARQUEE ── */
+.marquee-bar{padding:1.1rem 0;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.marquee-track{display:flex;animation:marquee 24s linear infinite;white-space:nowrap;}
+.mi{font-family:var(--fd);font-size:1.1rem;letter-spacing:.16em;color:rgba(245,242,238,.12);padding:0 2.5rem;}
+.mi.ac{color:var(--acid);}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── FEATURE BAR ── */
+.feature-bar{border-bottom:1px solid var(--border);}
+.feat-item{display:flex;align-items:flex-start;gap:.9rem;padding:1.8rem 1.5rem;}
+.feat-icon{width:42px;height:42px;border-radius:9px;flex-shrink:0;background:rgba(200,255,0,.07);border:1px solid rgba(200,255,0,.13);display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.feat-title{font-family:var(--fu);font-size:.85rem;font-weight:600;color:var(--white);margin-bottom:.22rem;}
+.feat-desc{font-size:.78rem;color:var(--muted);line-height:1.55;}
+
+/* ── SECTIONS ── */
+.wv-section{padding:5.5rem 3rem;}
+.sec-label{font-family:var(--fu);font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--acid);margin-bottom:.7rem;}
+.sec-title{font-family:var(--fd);font-size:clamp(2.2rem,5.5vw,4.8rem);line-height:.95;letter-spacing:.03em;margin-bottom:2.8rem;}
+.sec-title .ghost{color:transparent;-webkit-text-stroke:1.5px rgba(245,242,238,.2);}
+
+/* ── CAT TABS ── */
+.cat-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2.2rem;}
+.cat-tab{font-family:var(--fu);font-size:.74rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid var(--border);color:rgba(245,242,238,.5);padding:.5rem 1.1rem;border-radius:20px;cursor:pointer;transition:all .2s;}
+.cat-tab.active,.cat-tab:hover{background:var(--acid);color:#000!important;border-color:var(--acid);font-weight:700;}
+
+/* ── PRODUCT GRID ── */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.6rem;}
+.prod-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .35s,border-color .3s,box-shadow .35s;position:relative;}
+.prod-card:hover{transform:translateY(-10px);border-color:rgba(200,255,0,.25);box-shadow:0 24px 70px rgba(0,0,0,.5),0 0 0 1px rgba(200,255,0,.07);}
+.prod-img-wrap{height:320px;position:relative;overflow:hidden;background:#111;}
+.prod-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .5s;}
+.prod-card:hover .prod-img-wrap img{transform:scale(1.07);}
+.prod-img-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(10,10,10,.85));}
+.prod-tags{position:absolute;top:.9rem;left:.9rem;display:flex;gap:.35rem;z-index:3;}
+.tag{font-family:var(--fu);font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.25rem .6rem;border-radius:4px;line-height:1.4;}
+.t-hot{background:var(--pink);color:#fff;}
+.t-new{background:var(--acid);color:#000;}
+.t-ltd{background:var(--cyan);color:#000;}
+.t-sale{background:var(--orange);color:#fff;}
+.wish-btn{position:absolute;top:.9rem;right:.9rem;z-index:3;width:34px;height:34px;background:rgba(6,6,6,.75);border:1px solid rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:all .2s;backdrop-filter:blur(8px);}
+.wish-btn:hover{background:rgba(255,45,120,.22);border-color:var(--pink);transform:scale(1.1);}
+.wish-btn.liked{background:rgba(255,45,120,.25);border-color:var(--pink);}
+.prod-info{padding:1.1rem;}
+.prod-brand{font-family:var(--fu);font-size:.64rem;font-weight:700;color:rgba(245,242,238,.28);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.25rem;}
+.prod-name{font-family:var(--fu);font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.5rem;line-height:1.3;}
+.prod-sizes{display:flex;flex-wrap:wrap;gap:.28rem;margin-bottom:.75rem;}
+.sz{width:29px;height:29px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--fu);font-size:.62rem;font-weight:600;color:rgba(245,242,238,.36);cursor:pointer;transition:all .15s;}
+.sz:hover{border-color:var(--acid);color:var(--acid);background:rgba(200,255,0,.07);}
+.prod-bottom{display:flex;align-items:center;justify-content:space-between;}
+.prod-price{font-family:var(--fd);font-size:1.4rem;color:var(--white);line-height:1;}
+.prod-old{font-family:var(--fu);font-size:.75rem;color:rgba(245,242,238,.28);text-decoration:line-through;margin-right:.35rem;}
+.add-btn{width:38px;height:38px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--white);border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.add-btn:hover{background:var(--acid);border-color:var(--acid);color:#000;transform:scale(1.1);}
+
+/* ── DROPS ── */
+.drops-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:1.3rem;}
+.drop-card{border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .3s,box-shadow .3s;}
+.drop-card:hover{transform:scale(1.022);box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.drop-card.big{grid-row:span 2;}
+.drop-vis{position:relative;min-height:200px;height:100%;display:flex;align-items:flex-end;padding:1.5rem;overflow:hidden;}
+.drop-card.big .drop-vis{min-height:490px;}
+.drop-bg-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;display:block;transition:transform .55s ease;}
+.drop-card:hover .drop-bg-img{transform:scale(1.07);}
+.drop-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,4,4,.92) 0%,rgba(4,4,4,.15) 55%,transparent 100%);}
+.drop-info{position:relative;z-index:2;}
+.drop-tag{display:inline-block;font-family:var(--fu);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:.25rem .65rem;border-radius:4px;margin-bottom:.45rem;line-height:1.4;}
+.drop-title{font-family:var(--fd);font-size:1.7rem;color:var(--white);line-height:.95;margin-bottom:.3rem;}
+.drop-card.big .drop-title{font-size:2.9rem;}
+.drop-sub{font-family:var(--fu);font-size:.76rem;color:rgba(245,242,238,.55);}
+
+/* ── AI SECTION ── */
+.ai-section{padding:5.5rem 3rem;background:linear-gradient(135deg,rgba(200,255,0,.025),rgba(0,229,255,.015));border-top:1px solid var(--border);}
+.ai-demo-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.ai-demo-hd{padding:1rem 1.4rem;background:linear-gradient(90deg,rgba(200,255,0,.06),transparent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem;}
+.ai-dot{width:8px;height:8px;background:var(--acid);border-radius:50%;animation:blink 1.6s infinite;}
+.ai-demo-msgs{padding:1.4rem;display:flex;flex-direction:column;gap:.9rem;}
+.ai-msg-bot,.ai-msg-usr{max-width:88%;padding:.78rem 1rem;font-family:var(--fb);font-size:.8rem;line-height:1.6;border-radius:12px;}
+.ai-msg-bot{background:rgba(255,255,255,.05);border-radius:0 12px 12px 12px;color:rgba(245,242,238,.88);align-self:flex-start;}
+.ai-msg-usr{background:rgba(200,255,0,.1);border-radius:12px 0 12px 12px;color:var(--white);align-self:flex-end;}
+.ai-pills{display:flex;gap:.5rem;flex-wrap:wrap;padding:0 1.4rem 1.4rem;}
+.ai-pill{background:rgba(255,255,255,.04);border:1px solid var(--border);padding:.35rem .85rem;border-radius:20px;font-family:var(--fu);font-size:.7rem;color:rgba(245,242,238,.55);}
+.ai-feat-list{display:flex;flex-direction:column;}
+.ai-feat{display:flex;align-items:flex-start;gap:.9rem;padding:1.4rem 0;border-bottom:1px solid var(--border);}
+.ai-feat:last-child{border-bottom:none;}
+.ai-feat-num{font-family:var(--fd);font-size:2rem;color:rgba(200,255,0,.28);line-height:1;flex-shrink:0;width:2.5rem;}
+.ai-feat-h{font-family:var(--fu);font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.35rem;}
+.ai-feat-p{font-size:.8rem;color:var(--muted);line-height:1.6;}
+
+/* ── NEWSLETTER ── */
+.newsletter-section{padding:5.5rem 3rem;text-align:center;background:linear-gradient(135deg,rgba(200,255,0,.035),rgba(255,45,120,.025));border-top:1px solid var(--border);}
+.nl-form{display:flex;max-width:460px;margin:0 auto;border-radius:6px;overflow:hidden;}
+.nl-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-right:none;color:var(--white);font-family:var(--fb);font-size:.9rem;padding:.9rem 1.1rem;outline:none;transition:border-color .2s;}
+.nl-input:focus{border-color:rgba(200,255,0,.35);}
+.nl-input::placeholder{color:rgba(245,242,238,.2);}
+.nl-btn{background:var(--acid);color:#000;border:none;font-family:var(--fu);font-size:.78rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:.9rem 1.8rem;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.nl-btn:hover{background:var(--acid-d);}
+
+/* ── FOOTER ── */
+.wv-footer{padding:4rem 3rem 2rem;border-top:1px solid var(--border);}
+.footer-logo{font-family:var(--fd);font-size:2.8rem;letter-spacing:.1em;margin-bottom:.9rem;line-height:1;}
+.footer-logo span{color:var(--acid);}
+.footer-tag{font-size:.82rem;color:var(--muted);line-height:1.6;max-width:270px;margin-bottom:1.4rem;}
+.socials{display:flex;gap:.7rem;}
+.soc-btn{width:34px;height:34px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.82rem;cursor:pointer;transition:all .2s;}
+.soc-btn:hover{background:var(--acid);border-color:var(--acid);color:#000;}
+.footer-col h5{font-family:var(--fu);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,242,238,.32);margin-bottom:1.1rem;}
+.footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.6rem;}
+.footer-col a{color:rgba(245,242,238,.5);font-size:.82rem;text-decoration:none;cursor:pointer;transition:color .2s;}
+.footer-col a:hover{color:var(--white);}
+.footer-bottom{padding-top:1.8rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;align-items:center;}
+.footer-copy{font-size:.75rem;color:rgba(245,242,238,.2);}
+.footer-legal{display:flex;gap:1.4rem;}
+.footer-legal a{font-size:.75rem;color:rgba(245,242,238,.22);text-decoration:none;cursor:pointer;}
+.footer-legal a:hover{color:var(--muted);}
+
+/* ── AUTH ── */
+.auth-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+.auth-vis{position:relative;overflow:hidden;background:linear-gradient(150deg,#0c0c0c,#060606);display:flex;flex-direction:column;justify-content:flex-end;padding:3rem;}
+.auth-vis-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 35% 55%,rgba(200,255,0,.1) 0%,transparent 65%),radial-gradient(ellipse 50% 60% at 75% 75%,rgba(255,45,120,.07) 0%,transparent 55%);}
+.auth-hero-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.25;mix-blend-mode:luminosity;}
+.auth-big{position:absolute;font-family:var(--fd);font-size:22rem;line-height:1;color:rgba(200,255,0,.03);top:0;right:-1.5rem;pointer-events:none;}
+.float-card{position:absolute;background:rgba(14,14,14,.9);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;backdrop-filter:blur(14px);font-family:var(--fu);}
+.fc1{top:16%;left:10%;animation:fcf1 7s ease-in-out infinite;}
+.fc2{top:38%;right:8%;animation:fcf2 8s ease-in-out infinite;}
+.fc3{bottom:24%;left:14%;animation:fcf1 6.5s ease-in-out infinite 1.2s;}
+@keyframes fcf1{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-16px) rotate(0deg)}}
+@keyframes fcf2{0%,100%{transform:translateY(0) rotate(3deg)}50%{transform:translateY(-22px) rotate(1deg)}}
+.fc-em{font-size:1.5rem;margin-bottom:.25rem;}
+.fc-lbl{font-size:.68rem;color:rgba(245,242,238,.32);text-transform:uppercase;letter-spacing:.1em;}
+.fc-val{font-size:.88rem;font-weight:600;color:var(--white);}
+.auth-vis-title{position:relative;z-index:2;font-family:var(--fd);font-size:4.5rem;line-height:.92;letter-spacing:.04em;margin-bottom:.9rem;}
+.auth-vis-title span{color:var(--acid);}
+.auth-vis-sub{position:relative;z-index:2;font-size:.85rem;color:var(--muted);line-height:1.65;max-width:310px;}
+.auth-form-side{background:var(--black);display:flex;align-items:center;justify-content:center;padding:3rem 2.5rem;}
+.auth-form-inner{width:100%;max-width:400px;}
+.auth-back{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--fu);font-size:.78rem;color:var(--muted);cursor:pointer;margin-bottom:2.5rem;transition:color .2s;background:none;border:none;padding:0;}
+.auth-back:hover{color:var(--white);}
+.auth-title{font-family:var(--fd);font-size:3rem;letter-spacing:.04em;margin-bottom:.4rem;line-height:1.1;}
+.auth-sub{font-size:.82rem;color:var(--muted);margin-bottom:2rem;}
+.auth-sub a{color:var(--acid);cursor:pointer;text-decoration:none;}
+.form-lbl{display:block;font-family:var(--fu);font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(245,242,238,.36);margin-bottom:.45rem;}
+.form-ctrl{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--border);color:var(--white);font-family:var(--fb);font-size:.88rem;padding:.82rem 1rem;border-radius:8px;outline:none;transition:border-color .2s,background .2s;margin-bottom:1.1rem;}
+.form-ctrl:focus{border-color:rgba(200,255,0,.4);background:rgba(200,255,0,.025);}
+.form-ctrl::placeholder{color:rgba(245,242,238,.18);}
+.form-ctrl option{background:#111;}
+.form-row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.form-opts{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;margin-top:-.4rem;}
+.rem-me{display:flex;align-items:center;gap:.45rem;font-family:var(--fu);font-size:.78rem;color:var(--muted);cursor:pointer;}
+.forgot-link{font-family:var(--fu);font-size:.78rem;color:var(--acid);cursor:pointer;text-decoration:none;}
+.auth-cta{width:100%;background:var(--acid);color:#000!important;border:none;padding:.95rem;font-family:var(--fu);font-size:.88rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:transform .2s,box-shadow .25s;margin-bottom:1.5rem;}
+.auth-cta:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(200,255,0,.28);}
+.divider-row{display:flex;align-items:center;gap:.9rem;margin-bottom:1.4rem;}
+.divider-line{flex:1;height:1px;background:var(--border);}
+.divider-txt{font-family:var(--fu);font-size:.72rem;color:rgba(245,242,238,.2);white-space:nowrap;}
+.soc-auth{display:flex;gap:.8rem;}
+.soc-auth-btn{flex:1;background:rgba(255,255,255,.04);border:1.5px solid var(--border);color:var(--white);padding:.75rem;font-family:var(--fu);font-size:.8rem;font-weight:500;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.45rem;}
+.soc-auth-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);}
+
+/* ── ABOUT ── */
+.about-hero{min-height:60vh;display:flex;align-items:flex-end;padding:7rem 3rem 3.5rem;position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.about-hero-bg-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.18;mix-blend-mode:luminosity;}
+.about-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--black) 0%,rgba(6,6,6,.6) 50%,rgba(6,6,6,.3) 100%);}
+.about-hero-lbl{font-family:var(--fu);font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:.9rem;}
+.about-hero-title{font-family:var(--fd);font-size:clamp(4rem,9vw,8.5rem);line-height:.9;letter-spacing:.03em;}
+.about-content{padding:5rem 3rem;}
+.about-lead{font-family:var(--fd);font-size:clamp(1.8rem,3.5vw,2.6rem);line-height:1.1;letter-spacing:.02em;margin-bottom:1.8rem;}
+.about-lead span{color:var(--acid);}
+.about-body{font-size:.92rem;color:var(--muted);line-height:1.8;margin-bottom:1.4rem;}
+.about-stat-card{background:var(--s1);border:1px solid var(--border);padding:1.4rem;border-radius:10px;}
+.about-stat-num{font-family:var(--fd);font-size:2.8rem;color:var(--acid);line-height:1;margin-bottom:.3rem;}
+.about-stat-lbl{font-family:var(--fu);font-size:.72rem;color:rgba(245,242,238,.36);text-transform:uppercase;letter-spacing:.1em;}
+.team-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .3s,border-color .3s;}
+.team-card:hover{transform:translateY(-7px);border-color:rgba(200,255,0,.22);}
+.team-avatar{height:220px;overflow:hidden;position:relative;}
+.team-avatar img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform .4s;}
+.team-card:hover .team-avatar img{transform:scale(1.05);}
+.team-name{font-family:var(--fu);font-size:.88rem;font-weight:600;margin-bottom:.15rem;}
+.team-role{font-size:.75rem;color:rgba(245,242,238,.32);}
+
+/* ── CONTACT ── */
+.contact-method{display:flex;align-items:center;gap:1rem;padding:1.1rem;background:var(--s1);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s;margin-bottom:1rem;}
+.contact-method:hover{border-color:rgba(200,255,0,.22);}
+.cm-icon{width:40px;height:40px;background:rgba(200,255,0,.08);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.cm-lbl{font-family:var(--fu);font-size:.68rem;color:rgba(245,242,238,.3);text-transform:uppercase;letter-spacing:.09em;}
+.cm-val{font-family:var(--fu);font-size:.88rem;font-weight:500;color:var(--white);}
+.contact-form-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:2.2rem;}
+.topic-chip{display:inline-block;background:rgba(255,255,255,.04);border:1px solid var(--border);color:rgba(245,242,238,.5);font-family:var(--fu);font-size:.7rem;font-weight:500;padding:.38rem .85rem;border-radius:20px;cursor:pointer;transition:all .2s;margin:.25rem;}
+.topic-chip.sel,.topic-chip:hover{background:rgba(200,255,0,.1);border-color:var(--acid);color:var(--acid);}
+.contact-cta{width:100%;background:var(--acid);color:#000!important;border:none;padding:.92rem;font-family:var(--fu);font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;border-radius:8px;margin-top:.8rem;transition:transform .2s,box-shadow .25s;}
+.contact-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,255,0,.25);}
+textarea.form-ctrl{resize:none;height:115px;}
+
+/* ── CART ── */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1999;display:none;}
+.cart-overlay.open{display:block;}
+.cart-drawer{position:fixed;top:0;right:-450px;width:440px;height:100vh;background:rgba(8,8,8,.98);border-left:1px solid var(--border);z-index:2000;display:flex;flex-direction:column;transition:right .4s cubic-bezier(.16,1,.3,1);backdrop-filter:blur(30px);}
+.cart-drawer.open{right:0;}
+.cart-hd{padding:1.4rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.cart-hd-title{font-family:var(--fd);font-size:1.8rem;letter-spacing:.05em;}
+.cart-close-btn{width:36px;height:36px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--white);border-radius:8px;cursor:pointer;font-size:1.05rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.cart-close-btn:hover{background:rgba(255,255,255,.12);}
+.cart-body{flex:1;overflow-y:auto;padding:1.4rem;display:flex;flex-direction:column;gap:.9rem;}
+.cart-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:var(--muted);font-family:var(--fu);font-size:.82rem;}
+.cart-empty-ico{font-size:3.2rem;}
+.cart-item{display:flex;gap:.9rem;background:rgba(20,20,20,.8);border:1px solid var(--border);border-radius:10px;padding:.95rem;align-items:center;}
+.ci-img{width:60px;height:70px;border-radius:6px;overflow:hidden;flex-shrink:0;background:#111;}
+.ci-img img{width:100%;height:100%;object-fit:cover;}
+.ci-name{font-family:var(--fu);font-size:.82rem;font-weight:500;margin-bottom:.2rem;}
+.ci-sz{font-family:var(--fu);font-size:.68rem;color:rgba(245,242,238,.3);}
+.ci-price{font-family:var(--fd);font-size:1.1rem;color:var(--acid);}
+.qty-ctrl{display:flex;align-items:center;gap:.45rem;}
+.qty-btn{width:26px;height:26px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--white);border-radius:4px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.qty-btn:hover{background:rgba(200,255,0,.1);border-color:var(--acid);}
+.qty-n{font-family:var(--fu);font-size:.82rem;min-width:1.4rem;text-align:center;}
+.cart-ft{padding:1.4rem;border-top:1px solid var(--border);}
+.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;}
+.cart-total-lbl{font-family:var(--fu);font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;}
+.cart-total-val{font-family:var(--fd);font-size:2rem;color:var(--acid);}
+.checkout-cta{width:100%;background:var(--acid);color:#000!important;border:none;padding:.98rem;font-family:var(--fu);font-size:.85rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:8px;transition:transform .2s,box-shadow .25s;}
+.checkout-cta:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(200,255,0,.28);}
+
+/* ── AI BUBBLE & PANEL ── */
+.ai-bubble{position:fixed;bottom:2rem;right:2rem;z-index:900;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--cyan));display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s;animation:ai-pulse 3s infinite;}
+.ai-bubble:hover{transform:scale(1.12);}
+@keyframes ai-pulse{0%,100%{box-shadow:0 0 28px rgba(255,45,120,.4)}50%{box-shadow:0 0 50px rgba(0,229,255,.5),0 0 80px rgba(255,45,120,.28)}}
+.ai-bubble svg{width:26px;height:26px;fill:white;}
+.ai-panel{position:fixed;bottom:5.2rem;right:2rem;z-index:900;width:330px;background:rgba(10,10,10,.97);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:none;flex-direction:column;max-height:470px;box-shadow:0 18px 55px rgba(0,0,0,.5),0 0 0 1px rgba(200,255,0,.09);backdrop-filter:blur(28px);}
+.ai-panel.open{display:flex;}
+.ai-panel-hd{padding:.95rem 1.1rem;background:linear-gradient(90deg,rgba(200,255,0,.09),transparent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.7rem;}
+.ai-panel-title{font-family:var(--fu);font-size:.8rem;font-weight:600;color:var(--acid);}
+.ai-msgs-list{flex:1;overflow-y:auto;padding:.95rem;display:flex;flex-direction:column;gap:.75rem;}
+.ai-m{font-family:var(--fb);font-size:.8rem;line-height:1.55;max-width:90%;}
+.ai-m.bot{background:rgba(255,255,255,.06);padding:.6rem .85rem;border-radius:0 11px 11px 11px;color:rgba(245,242,238,.88);align-self:flex-start;}
+.ai-m.usr{background:rgba(200,255,0,.12);padding:.6rem .85rem;border-radius:11px 0 11px 11px;color:var(--white);align-self:flex-end;}
+.ai-chips{display:flex;flex-wrap:wrap;gap:.35rem;padding:0 .95rem .6rem;}
+.ai-chip{background:rgba(255,255,255,.05);border:1px solid var(--border);color:rgba(245,242,238,.65);font-family:var(--fu);font-size:.7rem;padding:.28rem .65rem;border-radius:18px;cursor:pointer;transition:all .2s;}
+.ai-chip:hover{background:rgba(200,255,0,.12);border-color:var(--acid);color:var(--acid);}
+.ai-input-row{padding:.75rem .95rem;border-top:1px solid var(--border);display:flex;gap:.55rem;}
+.ai-input{flex:1;background:rgba(255,255,255,.05);border:1.5px solid var(--border);color:var(--white);font-family:var(--fb);font-size:.8rem;padding:.48rem .75rem;border-radius:7px;outline:none;transition:border-color .2s;}
+.ai-input:focus{border-color:var(--acid);}
+.ai-send{background:var(--acid);color:#000;border:none;width:32px;height:32px;border-radius:7px;cursor:pointer;font-weight:700;transition:transform .2s;display:flex;align-items:center;justify-content:center;}
+.ai-send:hover{transform:scale(1.1);}
+
+/* ── TOAST ── */
+.toast-wv{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(12,12,12,.97);border:1px solid var(--border);color:var(--white);font-family:var(--fu);font-size:.8rem;padding:.65rem 1.3rem;border-radius:8px;z-index:9999;transition:transform .3s ease;backdrop-filter:blur(18px);white-space:nowrap;pointer-events:none;}
+.toast-wv.show{transform:translateX(-50%) translateY(0);}
+.t-ico{color:var(--acid);margin-right:.4rem;}
+
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.hero-right{flex:0 0 380px;}}
+@media(max-width:992px){.hero-right{display:none;}.auth-wrap{grid-template-columns:1fr;}.auth-vis{display:none;}.drops-grid{grid-template-columns:1fr 1fr;}.drops-grid .drop-card.big{grid-row:auto;grid-column:span 2;}}
+@media(max-width:768px){.wv-links{display:none;}.wv-nav{padding:0 1.2rem;}.wv-section,.wv-footer,.ai-section,.newsletter-section{padding-left:1.5rem;padding-right:1.5rem;}.hero-body{padding:2rem 1.5rem 1.5rem;}.hero-stats-row{padding:1.5rem;gap:1.5rem;}}
+@media(max-width:576px){.hero-title{font-size:clamp(3.2rem,13vw,5.5rem);}.cart-drawer{width:100vw;}.drops-grid{grid-template-columns:1fr;}.drops-grid .drop-card.big{grid-column:span 1;}}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div class="toast-wv" id="toast"><span class="t-ico">✓</span><span id="toast-text">Done!</span></div>
+
+<!-- ════════ NAVBAR ════════ -->
+<nav class="wv-nav">
+  <a class="wv-logo" onclick="showPage('home')">WEAR<span>VIO</span></a>
+  <ul class="wv-links">
+    <li><a onclick="showPage('home')">Home</a></li>
+    <li><a onclick="gotoSection('trending')">Shop</a></li>
+    <li><a onclick="gotoSection('drops')">Drops</a></li>
+    <li><a onclick="showPage('about')">About</a></li>
+    <li><a onclick="showPage('contact')">Contact</a></li>
+  </ul>
+  <div class="wv-actions">
+    <div class="wv-cart" onclick="toggleCart()">🛍<div class="cart-badge" id="cart-badge">0</div></div>
+    <button class="nav-wv-btn" id="nav-auth-btn" type="button">Sign In</button>
+  </div>
+</nav>
+
+<!-- ════════ CART DRAWER ════════ -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-hd">
+    <div class="cart-hd-title">YOUR BAG</div>
+    <button class="cart-close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-body" id="cart-body">
+    <div class="cart-empty" id="cart-empty">
+      <div class="cart-empty-ico">🛍</div>
+      <div>Your bag is empty</div>
+      <button class="btn-outline-wv" style="padding:.55rem 1.4rem;font-size:.74rem;" onclick="toggleCart();gotoSection('trending')">Start Shopping</button>
+    </div>
+  </div>
+  <div class="cart-ft" id="cart-ft" style="display:none;">
+    <div class="cart-total-row">
+      <span class="cart-total-lbl">Total</span>
+      <span class="cart-total-val" id="cart-total">₹0</span>
+    </div>
+    <button class="checkout-cta" id="checkout-btn" type="button">Checkout Now</button>
+  </div>
+</div>
+
+<!-- ════════ AI BUBBLE ════════ -->
+<div class="ai-bubble" onclick="toggleAI()">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="white"/><line x1="12" y1="3" x2="12" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="16" x2="12" y2="21" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="3" y1="12" x2="8" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="16" y1="12" x2="21" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+</div>
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-hd"><div class="ai-dot"></div><div class="ai-panel-title">WEARVIO AI Stylist</div><span style="margin-left:auto;font-family:var(--fu);font-size:.68rem;color:rgba(245,242,238,.3);">Online</span></div>
+  <div class="ai-msgs-list" id="ai-msgs"><div class="ai-m bot">Hey! 👋 I'm your AI stylist. Tell me your vibe and I'll curate the perfect looks for you!</div></div>
+  <div class="ai-chips">
+    <div class="ai-chip" onclick="sendAI('Y2K aesthetic fits')">Y2K aesthetic</div>
+    <div class="ai-chip" onclick="sendAI('Streetwear under ₹2000')">Budget fits</div>
+    <div class="ai-chip" onclick="sendAI('Outfit for a concert')">Concert outfit</div>
+    <div class="ai-chip" onclick="sendAI('Trending hoodies')">Hoodies</div>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="ai-inp" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')sendAIInput()">
+    <button class="ai-send" onclick="sendAIInput()">→</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     HOME PAGE
+════════════════════════════════════════════ -->
+<div id="home-page" class="page active">
+
+  <!-- HERO -->
+  <section class="hero-section">
+    <div class="hero-bg-fx"></div>
+    <div class="hero-grid-fx"></div>
+    <div class="hero-body">
+      <div class="hero-left">
+        <div class="hero-badge"><span class="badge-dot"></span>AI-Powered Fashion Universe</div>
+        <h1 class="hero-title">DRESS<span class="t2">DIFFERENT</span><span class="t3">LIVE LOUD</span></h1>
+        <p class="hero-sub">The ultimate GenZ fashion destination — AI-styled, drop-culture obsessed, unapologetically bold.</p>
+        <div class="hero-btns">
+          <button class="btn-acid" onclick="gotoSection('trending')">Shop Now →</button>
+          <button class="btn-outline-wv" onclick="gotoSection('drops')">Latest Drops</button>
+        </div>
+      </div>
+      <!-- 3D Cube with real model images -->
+      <div class="hero-right">
+        <div class="scene-3d">
+          <div class="cube-float">
+            <div class="cube-wrap">
+              <div class="face3d"><div class="face3d-inner"><img class="face3d-img" src="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=400&q=80&fit=crop&crop=top" alt="model 1"><div class="face3d-info"><div class="face3d-name">Neo Street Low</div><div class="face3d-price">₹3,499</div></div></div></div>
+              <div class="face3d"><div class="face3d-inner"><img class="face3d-img" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80&fit=crop&crop=top" alt="model 2"><div class="face3d-info"><div class="face3d-name">Oversized Puffer</div><div class="face3d-price">₹4,299</div></div></div></div>
+              <div class="face3d"><div class="face3d-inner"><img class="face3d-img" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80&fit=crop&crop=top" alt="model 3"><div class="face3d-info"><div class="face3d-name">Y2K Cargo Dress</div><div class="face3d-price">₹2,199</div></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Stats in their own row — always below content, zero overlap -->
+    <div class="hero-stats-row">
+      <div><div class="stat-num">50<em>K+</em></div><div class="stat-lbl">Active Drip-hauls</div></div>
+      <div><div class="stat-num">200<em>+</em></div><div class="stat-lbl">New Drops Monthly</div></div>
+      <div><div class="stat-num">4.9<em>★</em></div><div class="stat-lbl">Style Rating</div></div>
+      <div><div class="stat-num">60<em>%</em></div><div class="stat-lbl">Sustainable Pieces</div></div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-bar">
+    <div class="marquee-track">
+      <span class="mi">STREETWEAR</span><span class="mi ac">★</span><span class="mi">GENZ FASHION</span><span class="mi ac">★</span><span class="mi">AI STYLED</span><span class="mi ac">★</span><span class="mi">NEW DROPS DAILY</span><span class="mi ac">★</span><span class="mi">Y2K VIBES</span><span class="mi ac">★</span><span class="mi">WEARVIO</span><span class="mi ac">★</span><span class="mi">DARK ACADEMIA</span><span class="mi ac">★</span><span class="mi">COQUETTE ERA</span><span class="mi ac">★</span>
+      <span class="mi">STREETWEAR</span><span class="mi ac">★</span><span class="mi">GENZ FASHION</span><span class="mi ac">★</span><span class="mi">AI STYLED</span><span class="mi ac">★</span><span class="mi">NEW DROPS DAILY</span><span class="mi ac">★</span><span class="mi">Y2K VIBES</span><span class="mi ac">★</span><span class="mi">WEARVIO</span><span class="mi ac">★</span><span class="mi">DARK ACADEMIA</span><span class="mi ac">★</span><span class="mi">COQUETTE ERA</span><span class="mi ac">★</span>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="feature-bar">
+    <div class="row g-0">
+      <div class="col-6 col-md-3" style="border-right:1px solid var(--border);"><div class="feat-item"><div class="feat-icon">🤖</div><div><div class="feat-title">AI Stylist</div><div class="feat-desc">Personalized looks curated by our fashion AI in real-time.</div></div></div></div>
+      <div class="col-6 col-md-3" style="border-right:1px solid var(--border);"><div class="feat-item"><div class="feat-icon">⚡</div><div><div class="feat-title">Daily Drops</div><div class="feat-desc">Fresh pieces every day — indie labels to global collabs.</div></div></div></div>
+      <div class="col-6 col-md-3" style="border-right:1px solid var(--border);"><div class="feat-item"><div class="feat-icon">🔄</div><div><div class="feat-title">Free Returns</div><div class="feat-desc">Doesn't hit right? Return it free within 14 days.</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="feat-item"><div class="feat-icon">🌿</div><div><div class="feat-title">Sustainable</div><div class="feat-desc">60% of our collection uses eco-certified materials.</div></div></div></div>
+    </div>
+  </div>
+
+  <!-- TRENDING -->
+  <section class="wv-section" id="trending">
+    <div class="sec-label">🔥 What's Hitting Right Now</div>
+    <h2 class="sec-title">TRENDING <span class="ghost">COLLECTION</span></h2>
+    <div class="cat-tabs" id="category-tabs">
+      <div class="cat-tab active" onclick="filterCat(this,'all')">All</div>
+      <div class="cat-tab" onclick="filterCat(this,'streetwear')">Streetwear</div>
+      <div class="cat-tab" onclick="filterCat(this,'y2k')">Y2K</div>
+      <div class="cat-tab" onclick="filterCat(this,'hoodies')">Hoodies</div>
+      <div class="cat-tab" onclick="filterCat(this,'accessories')">Accessories</div>
+      <div class="cat-tab" onclick="filterCat(this,'bottoms')">Bottoms</div>
+      <div class="cat-tab" onclick="filterCat(this,'shoes')">Shoes</div>
+    </div>
+    <div class="product-grid" id="product-grid"></div>
+  </section>
+
+  <!-- DROPS -->
+  <section class="wv-section" id="drops" style="border-top:1px solid var(--border);padding-top:4rem;">
+    <div class="sec-label">💥 Limited Releases</div>
+    <h2 class="sec-title">LATEST <span class="ghost">DROPS</span></h2>
+    <div class="drops-grid">
+      <div class="drop-card big" onclick="showToast('Opening Cyber Punk SS25...')">
+        <div class="drop-vis">
+          <img class="drop-bg-img" src="https://images.unsplash.com/photo-1544441893-675973e31985?w=800&q=80&fit=crop" alt="cyber punk">
+          <div class="drop-overlay"></div>
+          <div class="drop-info"><div class="drop-tag" style="background:var(--cyan);color:#000;">Limited</div><div class="drop-title">CYBER PUNK<br>SS25</div><div class="drop-sub">42 pieces left · Ends in 2d 6h</div></div>
+        </div>
+      </div>
+      <div class="drop-card" onclick="showToast('Opening Y2K Revival...')">
+        <div class="drop-vis">
+          <img class="drop-bg-img" src="https://images.unsplash.com/photo-1495385794356-15371f348c31?w=600&q=80&fit=crop" alt="y2k">
+          <div class="drop-overlay"></div>
+          <div class="drop-info"><div class="drop-tag t-hot">Hot</div><div class="drop-title">Y2K REVIVAL</div><div class="drop-sub">Collab drop</div></div>
+        </div>
+      </div>
+      <div class="drop-card" onclick="showToast('Opening Dark Academia...')">
+        <div class="drop-vis">
+          <img class="drop-bg-img" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80&fit=crop" alt="dark academia">
+          <div class="drop-overlay"></div>
+          <div class="drop-info"><div class="drop-tag t-new">New</div><div class="drop-title">DARK ACADEMIA</div><div class="drop-sub">Exclusive prints</div></div>
+        </div>
+      </div>
+      <div class="drop-card" onclick="showToast('Opening Gorpcore...')">
+        <div class="drop-vis">
+          <img class="drop-bg-img" src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80&fit=crop" alt="gorpcore">
+          <div class="drop-overlay"></div>
+          <div class="drop-info"><div class="drop-tag t-sale">−30%</div><div class="drop-title">GORPCORE</div><div class="drop-sub">Outdoor street</div></div>
+        </div>
+      </div>
+      <div class="drop-card" onclick="showToast('Opening Coquette...')">
+        <div class="drop-vis">
+          <img class="drop-bg-img" src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80&fit=crop" alt="coquette">
+          <div class="drop-overlay"></div>
+          <div class="drop-info"><div class="drop-tag" style="background:var(--pink);color:#fff;">Viral</div><div class="drop-title">COQUETTE</div><div class="drop-sub">TikTok approved</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI STYLIST SECTION -->
+  <div class="ai-section">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-5">
+        <div class="ai-demo-card">
+          <div class="ai-demo-hd"><div class="ai-dot"></div><span style="font-family:var(--fu);font-size:.78rem;font-weight:600;color:var(--acid);">WEARVIO AI</span><span style="margin-left:auto;font-family:var(--fu);font-size:.68rem;color:rgba(245,242,238,.3);">Online</span></div>
+          <div class="ai-demo-msgs">
+            <div class="ai-msg-bot">Based on your recent views, you'd love the Cyber Punk SS25 drop 🌐. Total techwear energy!</div>
+            <div class="ai-msg-usr">Show me something for a college party.</div>
+            <div class="ai-msg-bot">Perfect! Oversized Graphic Tee + Y2K Low Rise Cargos + chunky platforms = head-turner combo 🔥</div>
+          </div>
+          <div class="ai-pills"><div class="ai-pill">Casual day 🌤</div><div class="ai-pill">Concert ready 🎵</div><div class="ai-pill">Night out ✨</div></div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="sec-label">🤖 AI-Powered</div>
+        <h2 class="sec-title" style="margin-bottom:2rem;">YOUR PERSONAL <span class="ghost">STYLIST</span></h2>
+        <div class="ai-feat-list">
+          <div class="ai-feat"><div class="ai-feat-num">01</div><div><div class="ai-feat-h">Vibe-based recommendations</div><div class="ai-feat-p">Tell it your aesthetic — Y2K, coquette, streetwear, dark academia — and it curates perfect looks in seconds.</div></div></div>
+          <div class="ai-feat"><div class="ai-feat-num">02</div><div><div class="ai-feat-h">Complete outfit builder</div><div class="ai-feat-p">Get head-to-toe fits assembled from our entire catalog, styled to perfection for any occasion.</div></div></div>
+          <div class="ai-feat"><div class="ai-feat-num">03</div><div><div class="ai-feat-h">Real-time trend alerts</div><div class="ai-feat-p">Instant notifications when something matching your style profile drops — never miss a release.</div></div></div>
+        </div>
+        <button class="btn-acid mt-4" onclick="document.getElementById('ai-panel').classList.add('open')">Chat with AI Stylist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="newsletter-section">
+    <div class="sec-label">Stay in the loop</div>
+    <h2 class="sec-title mb-3">GET THE DROP<br><span class="ghost">BEFORE ANYONE</span></h2>
+    <p style="font-size:.9rem;color:var(--muted);max-width:420px;margin:0 auto 2.2rem;line-height:1.7;">Be the first to know about new releases, exclusive collabs, and secret sales.</p>
+    <form class="nl-form" id="newsletter-form">
+      <input class="nl-input" id="newsletter-email" type="email" placeholder="your@email.com">
+      <button class="nl-btn" type="submit">Subscribe</button>
+    </form>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="wv-footer">
+    <div class="row g-4 mb-4">
+      <div class="col-12 col-md-5">
+        <div class="footer-logo">WEAR<span>VIO</span></div>
+        <p class="footer-tag">The AI-powered fashion universe built for GenZ. Dress different. Live loud. No rules.</p>
+        <div class="socials"><div class="soc-btn">𝕏</div><div class="soc-btn">📸</div><div class="soc-btn">▶</div><div class="soc-btn">🎵</div></div>
+      </div>
+      <div class="col-6 col-md-2 footer-col"><h5>Shop</h5><ul><li><a onclick="gotoSection('trending')">New Arrivals</a></li><li><a onclick="gotoSection('drops')">Latest Drops</a></li><li><a>Streetwear</a></li><li><a>Y2K Collection</a></li><li><a>Accessories</a></li></ul></div>
+      <div class="col-6 col-md-2 footer-col"><h5>Help</h5><ul><li><a onclick="showPage('contact')">Contact Us</a></li><li><a>Size Guide</a></li><li><a>Shipping Info</a></li><li><a>Returns</a></li><li><a>Track Order</a></li></ul></div>
+      <div class="col-6 col-md-2 footer-col"><h5>Company</h5><ul><li><a onclick="showPage('about')">About Us</a></li><li><a>Sustainability</a></li><li><a>Careers</a></li><li><a>Press</a></li><li><a>Affiliates</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO. All rights reserved. Images via Unsplash.</div><div class="footer-legal"><a>Privacy Policy</a><a>Terms of Use</a><a>Cookie Policy</a></div></div>
+  </footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     LOGIN
+════════════════════════════════════════════ -->
+<div id="login-page" class="page">
+  <div class="auth-wrap">
+    <div class="auth-vis">
+      <div class="auth-vis-bg"></div>
+      <img class="auth-hero-img" src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=900&q=80&fit=crop" alt="fashion">
+      <div class="auth-big">W</div>
+      <div class="float-card fc1"><div class="fc-em">🔥</div><div class="fc-lbl">New Drop</div><div class="fc-val">Cyber SS25</div></div>
+      <div class="float-card fc2"><div class="fc-em">⚡</div><div class="fc-lbl">Style Score</div><div class="fc-val">98 / 100</div></div>
+      <div class="float-card fc3"><div class="fc-em">🛍</div><div class="fc-lbl">Wishlist</div><div class="fc-val">12 items saved</div></div>
+      <div style="position:relative;z-index:2;"><div class="auth-vis-title">WELCOME<br><span>BACK</span></div><p class="auth-vis-sub">Your AI stylist has new picks waiting. Log in to see what's fire.</p></div>
+    </div>
+    <div class="auth-form-side">
+      <div class="auth-form-inner">
+        <button class="auth-back" onclick="showPage('home')">← Back to home</button>
+        <h2 class="auth-title">SIGN IN</h2>
+        <p class="auth-sub">Don't have an account? <a onclick="showPage('signup')">Create one free →</a></p>
+        <form id="login-form">
+          <label class="form-lbl">Email</label><input class="form-ctrl" id="login-email" type="email" placeholder="your@email.com">
+          <label class="form-lbl">Password</label><input class="form-ctrl" id="login-password" type="password" placeholder="••••••••">
+          <div class="form-opts"><label class="rem-me"><input type="checkbox" style="margin-right:.35rem;"> Remember me</label><a class="forgot-link" onclick="showToast('Password reset can be enabled from Supabase Auth settings')">Forgot password?</a></div>
+          <button class="auth-cta" id="login-submit" type="submit">Sign In</button>
+        </form>
+        <div class="divider-row"><div class="divider-line"></div><span class="divider-txt">or continue with</span><div class="divider-line"></div></div>
+        <div class="soc-auth"><button class="soc-auth-btn" type="button" onclick="showToast('Google login can be enabled later from Supabase providers')">🌐 Google</button><button class="soc-auth-btn" type="button" onclick="showToast('Apple login can be enabled later from Supabase providers')">🍎 Apple</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SIGNUP
+════════════════════════════════════════════ -->
+<div id="signup-page" class="page">
+  <div class="auth-wrap">
+    <div class="auth-vis">
+      <div class="auth-vis-bg"></div>
+      <img class="auth-hero-img" src="https://images.unsplash.com/photo-1554568218-0f1715e72254?w=900&q=80&fit=crop" alt="fashion signup">
+      <div class="auth-big">V</div>
+      <div class="float-card fc1"><div class="fc-em">🤖</div><div class="fc-lbl">AI Stylist</div><div class="fc-val">Free Access</div></div>
+      <div class="float-card fc2"><div class="fc-em">🎁</div><div class="fc-lbl">Welcome Offer</div><div class="fc-val">20% off first order</div></div>
+      <div class="float-card fc3"><div class="fc-em">🌟</div><div class="fc-lbl">Members get</div><div class="fc-val">Early drop access</div></div>
+      <div style="position:relative;z-index:2;"><div class="auth-vis-title">JOIN THE<br><span>UNIVERSE</span></div><p class="auth-vis-sub">AI-styled looks, exclusive drops & 20% off your first order.</p></div>
+    </div>
+    <div class="auth-form-side">
+      <div class="auth-form-inner">
+        <button class="auth-back" onclick="showPage('home')">← Back to home</button>
+        <h2 class="auth-title">CREATE ACCOUNT</h2>
+        <p class="auth-sub">Already a member? <a onclick="showPage('login')">Sign in →</a></p>
+        <form id="signup-form">
+          <div class="form-row2"><div><label class="form-lbl">First Name</label><input class="form-ctrl" id="signup-first-name" placeholder="Aarav"></div><div><label class="form-lbl">Last Name</label><input class="form-ctrl" id="signup-last-name" placeholder="Shah"></div></div>
+          <label class="form-lbl">Email</label><input class="form-ctrl" id="signup-email" type="email" placeholder="your@email.com">
+          <label class="form-lbl">Password</label><input class="form-ctrl" id="signup-password" type="password" placeholder="Create a strong password">
+          <label class="form-lbl">Your Aesthetic / Vibe</label>
+          <select class="form-ctrl" id="signup-vibe"><option value="">Select your style...</option><option>Streetwear / Urban</option><option>Y2K / Retro</option><option>Dark Academia</option><option>Coquette / Soft</option><option>Gorpcore / Outdoor</option><option>Cyber / Techwear</option></select>
+          <button class="auth-cta" id="signup-submit" type="submit">Create Account</button>
+        </form>
+        <div class="divider-row"><div class="divider-line"></div><span class="divider-txt">or sign up with</span><div class="divider-line"></div></div>
+        <div class="soc-auth"><button class="soc-auth-btn" type="button" onclick="showToast('Google signup can be enabled later from Supabase providers')">🌐 Google</button><button class="soc-auth-btn" type="button" onclick="showToast('Apple signup can be enabled later from Supabase providers')">🍎 Apple</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     ABOUT
+════════════════════════════════════════════ -->
+<div id="about-page" class="page">
+  <div style="padding-top:68px;">
+    <div class="about-hero">
+      <img class="about-hero-bg-img" src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=1400&q=80&fit=crop" alt="about">
+      <div class="about-hero-overlay"></div>
+      <div style="position:relative;z-index:2;"><div class="about-hero-lbl">Our Story</div><h1 class="about-hero-title">WE ARE<br>WEARVIO</h1></div>
+    </div>
+    <div class="about-content">
+      <div class="row g-5 align-items-start">
+        <div class="col-lg-6">
+          <h2 class="about-lead">Fashion that <span>speaks</span> before you do.</h2>
+          <p class="about-body">WEARVIO was born in 2023 in a college dorm in Mumbai. Two friends tired of boring fast-fashion decided to build something that actually hit — a platform where AI meets street culture, drops are always fire, and every piece has a story.</p>
+          <p class="about-body">We work with indie designers, up-and-coming streetwear labels, and sustainable manufacturers to bring limited, loud collections always on the pulse of what GenZ wants.</p>
+          <p class="about-body">Our AI stylist genuinely learns your taste, tracks trends in real-time, and helps you build fits that make you feel unstoppable. Fashion should be personal — not generic.</p>
+          <button class="btn-acid mt-3" onclick="showPage('contact')">Work With Us →</button>
+        </div>
+        <div class="col-lg-6">
+          <div class="row g-3">
+            <div class="col-6"><div class="about-stat-card"><div class="about-stat-num">2023</div><div class="about-stat-lbl">Founded</div></div></div>
+            <div class="col-6"><div class="about-stat-card"><div class="about-stat-num">50K+</div><div class="about-stat-lbl">Happy customers</div></div></div>
+            <div class="col-6"><div class="about-stat-card"><div class="about-stat-num">200+</div><div class="about-stat-lbl">Brand partners</div></div></div>
+            <div class="col-6"><div class="about-stat-card"><div class="about-stat-num">60%</div><div class="about-stat-lbl">Sustainable pieces</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wv-section" style="padding-top:0;">
+      <div class="sec-label">The squad</div><h2 class="sec-title">MEET THE <span class="ghost">TEAM</span></h2>
+      <div class="row g-3">
+        <div class="col-6 col-md-3"><div class="team-card"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=face" alt="Aarav Mehta"></div><div class="p-3"><div class="team-name">Aarav Mehta</div><div class="team-role">Co-founder & CEO</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="team-card"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80&fit=crop&crop=face" alt="Zara Kapoor"></div><div class="p-3"><div class="team-name">Zara Kapoor</div><div class="team-role">Creative Director</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="team-card"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80&fit=crop&crop=face" alt="Rohan Singh"></div><div class="p-3"><div class="team-name">Rohan Singh</div><div class="team-role">Head of AI</div></div></div></div>
+        <div class="col-6 col-md-3"><div class="team-card"><div class="team-avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80&fit=crop&crop=face" alt="Priya Nair"></div><div class="p-3"><div class="team-name">Priya Nair</div><div class="team-role">Head of Community</div></div></div></div>
+      </div>
+    </div>
+  </div>
+  <footer class="wv-footer"><div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO.</div><div class="footer-legal"><a onclick="showPage('home')">Home</a><a onclick="showPage('contact')">Contact</a></div></div></footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     CONTACT
+════════════════════════════════════════════ -->
+<div id="contact-page" class="page">
+  <div style="padding-top:68px;">
+    <div class="wv-section">
+      <div class="row g-5">
+        <div class="col-lg-4">
+          <h2 class="sec-title" style="font-size:clamp(2.2rem,6vw,4rem);margin-bottom:1rem;">LET'S<br><span style="color:var(--acid);">TALK</span></h2>
+          <p style="font-size:.88rem;color:var(--muted);line-height:1.7;margin-bottom:2rem;">Got questions, collab ideas, press enquiries, or just want to say hi?</p>
+          <div class="contact-method"><div class="cm-icon">📧</div><div><div class="cm-lbl">Email</div><div class="cm-val">hello@wearvio.in</div></div></div>
+          <div class="contact-method"><div class="cm-icon">📱</div><div><div class="cm-lbl">WhatsApp Support</div><div class="cm-val">+91 98765 43210</div></div></div>
+          <div class="contact-method"><div class="cm-icon">📍</div><div><div class="cm-lbl">HQ</div><div class="cm-val">Bandra West, Mumbai 400050</div></div></div>
+          <div class="contact-method"><div class="cm-icon">⏰</div><div><div class="cm-lbl">Support Hours</div><div class="cm-val">Mon–Sat, 10am–8pm IST</div></div></div>
+        </div>
+        <div class="col-lg-8">
+          <div class="contact-form-card">
+            <h3 style="font-family:var(--fd);font-size:2rem;margin-bottom:.4rem;letter-spacing:.04em;">SEND A MESSAGE</h3>
+            <p style="font-size:.8rem;color:var(--muted);margin-bottom:1.5rem;">We reply within 24 hours. Promise.</p>
+            <form id="contact-form">
+              <div class="mb-3"><div class="topic-chip sel" onclick="toggleTopic(this)">Order Help</div><div class="topic-chip" onclick="toggleTopic(this)">Collab</div><div class="topic-chip" onclick="toggleTopic(this)">Press</div><div class="topic-chip" onclick="toggleTopic(this)">Returns</div><div class="topic-chip" onclick="toggleTopic(this)">Other</div></div>
+              <div class="form-row2"><div><label class="form-lbl">Name</label><input class="form-ctrl" id="contact-name" placeholder="Your name"></div><div><label class="form-lbl">Email</label><input class="form-ctrl" id="contact-email" type="email" placeholder="your@email.com"></div></div>
+              <label class="form-lbl">Subject</label><input class="form-ctrl" id="contact-subject" placeholder="What's up?">
+              <label class="form-lbl">Message</label><textarea class="form-ctrl" id="contact-message" placeholder="Tell us more..."></textarea>
+              <button class="contact-cta" id="contact-submit" type="submit">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="wv-footer"><div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO.</div><div class="footer-legal"><a onclick="showPage('home')">Home</a><a onclick="showPage('about')">About</a></div></div></footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="wearvio.public-config.js"></script>
+<script src="/api/public/runtime-config.js"></script>
+<script src="wearvio.app.js"></script>
+</body>
+</html>
