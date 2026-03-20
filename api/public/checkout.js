@@ -1,11 +1,11 @@
-const { getServerConfig, isSupabaseConfigured } = require("../_shared/config");
+const { getServerConfig, isSupabaseConfigured } = require("../../lib/config");
 const {
   methodNotAllowed,
   readJsonBody,
   sendError,
   sendJson
-} = require("../_shared/http");
-const { auth, rpc } = require("../_shared/supabase");
+} = require("../../lib/http");
+const { auth, rpc } = require("../../lib/supabase");
 
 async function resolveUser(accessToken) {
   const { supabaseAnonKey } = getServerConfig();
@@ -64,4 +64,3 @@ module.exports = async (req, res) => {
     return sendError(res, error.statusCode || 500, error.message, error.details);
   }
 };
-

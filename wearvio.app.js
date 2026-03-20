@@ -910,12 +910,13 @@
     }
 
     try {
-      const response = await fetch("/api/public/newsletter", {
+      const response = await fetch("/api/public/forms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          type: "newsletter",
           email: input.value.trim()
         })
       });
@@ -951,12 +952,13 @@
     }
 
     try {
-      const response = await fetch("/api/public/contact", {
+      const response = await fetch("/api/public/forms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          type: "contact",
           name: name,
           email: email,
           subject: subject,

@@ -1,7 +1,7 @@
-const { isSupabaseConfigured } = require("../_shared/config");
-const { requireAdmin } = require("../_shared/adminAuth");
-const { methodNotAllowed, sendError } = require("../_shared/http");
-const { rest } = require("../_shared/supabase");
+const { isSupabaseConfigured } = require("../../lib/config");
+const { requireAdmin } = require("../../lib/adminAuth");
+const { methodNotAllowed, sendError } = require("../../lib/http");
+const { rest } = require("../../lib/supabase");
 
 module.exports = async (req, res) => {
   if (req.method !== "GET") {

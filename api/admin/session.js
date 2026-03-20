@@ -1,5 +1,5 @@
-const { clearAdminCookie, requireAdmin } = require("../_shared/adminAuth");
-const { methodNotAllowed, sendJson } = require("../_shared/http");
+const { clearAdminCookie, requireAdmin } = require("../../lib/adminAuth");
+const { methodNotAllowed, sendJson } = require("../../lib/http");
 
 module.exports = async (req, res) => {
   if (req.method === "GET") {

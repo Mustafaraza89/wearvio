@@ -1,4 +1,5 @@
 const { isSupabaseConfigured } = require("../../lib/config");
+const { requireAdmin } = require("../../lib/adminAuth");
 const { methodNotAllowed, sendError, sendJson } = require("../../lib/http");
 const { rest } = require("../../lib/supabase");
 
@@ -8,28 +9,26 @@ module.exports = async (req, res) => {
   }
 
   if (!isSupabaseConfigured()) {
-    return sendJson(res, 200, {
-      ok: false,
-      configured: false,
-      categories: [],
-      products: [],
-      message: "Supabase env variables are not configured yet."
-    });
+    return sendError(res, 503, "Supabase is not configured");
+  }
+
+  const session = await requireAdmin(req, res);
+  if (!session) {
+    return;
   }
 
   try {
-    const [categories, products] = await Promise.all([
-      rest("categories", {
+    const [users, logs] = await Promise.all([
+      rest("users", {
         params: {
-          select: "id,name,slug,description",
-          order: "created_at.asc"
+          select: "id,email,full_name,role,created_at",
+          order: "created_at.desc"
         }
       }),
-      rest("products", {
+      rest("stock_logs", {
         params: {
           select:
-            "id,name,slug,brand,sku,description,price,compare_at_price,quantity,low_stock_threshold,image_url,sizes,tag,is_active,category:categories(id,name,slug)",
-          is_active: "eq.true",
+            "id,quantity_before,quantity_after,delta,reason,created_at,product:products(id,name,sku),changed_by_user:users(id,full_name,email)",
           order: "created_at.desc"
         }
       })
@@ -37,11 +36,11 @@ module.exports = async (req, res) => {
 
     return sendJson(res, 200, {
       ok: true,
-      configured: true,
-      categories,
-      products
+      users,
+      logs
     });
   } catch (error) {
     return sendError(res, error.statusCode || 500, error.message, error.details);
   }
 };
+

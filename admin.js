@@ -724,8 +724,7 @@
         api("/api/admin/products"),
         api("/api/admin/categories"),
         api("/api/admin/orders"),
-        api("/api/admin/users"),
-        api("/api/admin/stock-logs")
+        api("/api/admin/data")
       ]);
 
       state.dashboard = results[0];
@@ -733,7 +732,7 @@
       state.categories = results[2].categories || [];
       state.orders = results[3].orders || [];
       state.users = results[4].users || [];
-      state.logs = results[5].logs || [];
+      state.logs = results[4].logs || [];
       renderAll();
       setStatus(successMessage || "Live backend connected and synced.", "success");
     } catch (error) {

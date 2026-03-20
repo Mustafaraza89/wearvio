@@ -1,4 +1,4 @@
-const { getPublicRuntimeConfig } = require("../_shared/config");
+const { getPublicRuntimeConfig } = require("../../lib/config");
 
 module.exports = async (req, res) => {
   const config = getPublicRuntimeConfig();

@@ -1,12 +1,12 @@
-const { isSupabaseConfigured } = require("../_shared/config");
-const { requireAdmin } = require("../_shared/adminAuth");
+const { isSupabaseConfigured } = require("../../lib/config");
+const { requireAdmin } = require("../../lib/adminAuth");
 const {
   methodNotAllowed,
   readJsonBody,
   sendError,
   sendJson
-} = require("../_shared/http");
-const { rest } = require("../_shared/supabase");
+} = require("../../lib/http");
+const { rest } = require("../../lib/supabase");
 
 function normalizeProductInput(input) {
   const payload = {
@@ -127,4 +127,3 @@ module.exports = async (req, res) => {
     return sendError(res, error.statusCode || 500, error.message, error.details);
   }
 };
-

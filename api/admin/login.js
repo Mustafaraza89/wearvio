@@ -1,15 +1,15 @@
-const { getServerConfig } = require("../_shared/config");
+const { getServerConfig } = require("../../lib/config");
 const {
   methodNotAllowed,
   readJsonBody,
   sendError,
   sendJson
-} = require("../_shared/http");
+} = require("../../lib/http");
 const {
   createSessionToken,
   ensureAdminUser,
   setAdminCookie
-} = require("../_shared/adminAuth");
+} = require("../../lib/adminAuth");
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") {
