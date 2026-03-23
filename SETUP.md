@@ -33,6 +33,12 @@ Ye env vars set karo:
 
 Reference ke liye [`.env.example`](./.env.example) me sample values diye gaye hain.
 
+Important:
+
+- Real secrets ko repo me commit mat karo.
+- Vercel / server env vars hi actual source of truth hone chahiye.
+- Agar koi secret GitHub me push ho gaya ho to usko immediately rotate karo.
+
 ## 4. Routes
 
 - Storefront: `/`
@@ -40,12 +46,12 @@ Reference ke liye [`.env.example`](./.env.example) me sample values diye gaye ha
 
 `vercel.json` already configured hai so root pe [`wearvio.html`](./wearvio.html) aur admin route pe [`admin.html`](./admin.html) serve hoga.
 
-## 5. Default testing admin credential
+## 5. Admin credential
 
-- Email: `admin@wearvio.in`
-- Password: `Wearvio@2026!`
+- Email: apna khud ka owner email use karo
+- Password: strong custom password use karo
 
-Production me deploy karne se pehle password aur session secret rotate karna strongly recommended hai.
+Production me deploy karne se pehle password aur session secret rotate karna mandatory samjho.
 
 ## 6. Backup
 

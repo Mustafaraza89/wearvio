@@ -22,6 +22,14 @@ module.exports = async (req, res) => {
     const password = String(body.password || "");
     const config = getServerConfig();
 
+    if (!config.adminEmail || !config.adminPassword || !config.adminSessionSecret) {
+      return sendError(
+        res,
+        503,
+        "Admin environment variables are not configured on the server"
+      );
+    }
+
     if (
       email !== config.adminEmail.toLowerCase() ||
       password !== config.adminPassword
