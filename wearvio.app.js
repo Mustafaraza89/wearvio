@@ -474,7 +474,7 @@
           "</div>" +
           '<button class="add-btn" onclick="addToCart(\'' +
           product.id +
-          "')" +
+          '\')"' +
           disabled +
           ">" +
           buttonLabel +
