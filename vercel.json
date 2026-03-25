@@ -1,14 +1,4 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/wearvio.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/admin.html"
-    }
-  ]
+  "cleanUrls": true
 }
 

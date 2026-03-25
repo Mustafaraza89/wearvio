@@ -44,7 +44,7 @@ Important:
 - Storefront: `/`
 - Admin panel: `/admin`
 
-`vercel.json` already configured hai so root pe [`wearvio.html`](./wearvio.html) aur admin route pe [`admin.html`](./admin.html) serve hoga.
+`vercel.json` cleanUrls config se root pe `index.html` (pehle wearvio.html tha) aur admin route pe [`admin.html`](./admin.html) serve hoga.
 
 ## 5. Admin credential
 
