@@ -23,7 +23,8 @@ body{background:var(--black);color:var(--white);font-family:var(--fb);overflow-x
 
 /* ── PAGES ── */
 .page{display:none;min-height:100vh;}
-.page.active{display:block;}
+.page.active{display:block;animation:fadeIn 0.35s ease forwards;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── NAVBAR ── */
 .wv-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,6,.85);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid var(--border);}
@@ -573,6 +574,141 @@ textarea.form-ctrl{resize:none;height:115px;}
     </div>
     <div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO. All rights reserved. Images via Unsplash.</div><div class="footer-legal"><a>Privacy Policy</a><a>Terms of Use</a><a>Cookie Policy</a></div></div>
   </footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PROFILE
+════════════════════════════════════════════ -->
+<div id="profile-page" class="page">
+  <div style="padding-top:100px; min-height:80vh;" class="wv-section">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <h2 class="sec-title" style="font-size:3rem; margin-bottom:2rem;">YOUR <span style="color:var(--acid);">PROFILE</span></h2>
+        
+        <div style="background:var(--s1); border:1px solid var(--border); border-radius:14px; padding:2rem; margin-bottom:2rem;">
+          <h3 style="font-family:var(--fd); font-size:1.5rem; margin-bottom:1rem; letter-spacing:0.04em;">ACCOUNT DETAILS</h3>
+          <div style="display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem;">
+            <div style="width:80px; height:80px; border-radius:50%; background:var(--acid); display:flex; align-items:center; justify-content:center; font-family:var(--fd); font-size:2.5rem; color:#000;" id="profile-initials">W</div>
+            <div>
+              <div style="font-family:var(--fu); font-size:1.2rem; font-weight:700; color:var(--white);" id="profile-name">User Name</div>
+              <div style="font-size:0.9rem; color:var(--muted);" id="profile-email">user@email.com</div>
+            </div>
+          </div>
+          <button class="btn-outline-wv" style="border-color:var(--pink); color:var(--pink)!important;" onclick="handleSignOut()">Log Out Dashboard</button>
+        </div>
+
+        <div style="background:var(--s1); border:1px solid var(--border); border-radius:14px; padding:2rem;">
+          <h3 style="font-family:var(--fd); font-size:1.5rem; margin-bottom:1rem; letter-spacing:0.04em;">ORDER HISTORY</h3>
+          <div style="color:var(--muted); font-size:0.9rem;">
+            <em>No past orders tracked yet. Check back here after completing an order!</em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="wv-footer"><div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO.</div><div class="footer-legal"><a onclick="showPage('home')">Home</a></div></div></footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PRODUCT DETAILS
+════════════════════════════════════════════ -->
+<div id="product-page" class="page">
+  <div style="padding-top:80px; min-height:80vh;" class="wv-section">
+    <button class="auth-back" style="margin-bottom:1.5rem;" onclick="showPage('home')">← Back to Shop</button>
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <div style="background:#111; border-radius:14px; overflow:hidden; position:relative;">
+          <img id="pdp-img" src="" alt="Product Image" style="width:100%; height:auto; object-fit:cover; display:block; min-height:500px;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&fit=crop'">
+        </div>
+      </div>
+      <div class="col-lg-6" style="display:flex; flex-direction:column; justify-content:center;">
+        <div class="prod-brand" id="pdp-brand" style="font-size:0.8rem; margin-bottom:0.5rem;">WEARVIO</div>
+        <h2 id="pdp-title" style="font-family:var(--fd); font-size:3.5rem; line-height:1; margin-bottom:1rem; letter-spacing:0.02em;">Product Title</h2>
+        <div id="pdp-price" style="font-family:var(--fd); font-size:2rem; color:var(--acid); margin-bottom:2rem;">₹0</div>
+        
+        <p id="pdp-desc" style="color:var(--muted); font-size:0.95rem; line-height:1.7; margin-bottom:2rem;">
+          Description will appear here. Premium quality, expertly crafted.
+        </p>
+
+        <div style="margin-bottom:2rem;">
+          <div style="font-family:var(--fu); font-size:0.75rem; font-weight:700; color:var(--white); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.8rem;">Select Size</div>
+          <div class="prod-sizes" id="pdp-sizes" style="gap:0.5rem;">
+            <!-- Sizes pushed via JS -->
+          </div>
+        </div>
+
+        <button class="checkout-cta" id="pdp-add-btn" type="button" style="padding:1.2rem; font-size:1rem; max-width:300px;" onclick="">ADD TO BAG</button>
+      </div>
+    </div>
+  </div>
+  <footer class="wv-footer"><div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO.</div><div class="footer-legal"><a onclick="showPage('home')">Home</a></div></div></footer>
+</div>
+
+<!-- ════════════════════════════════════════════
+     CHECKOUT
+════════════════════════════════════════════ -->
+<div id="checkout-page" class="page">
+  <div style="padding-top:80px; min-height:80vh;" class="wv-section">
+    <button class="auth-back" style="margin-bottom:1.5rem;" onclick="showPage('home')">← Back to Shop</button>
+    <div class="row justify-content-center g-5">
+      <div class="col-lg-6">
+        <h2 class="sec-title" style="font-size:3rem; margin-bottom:2rem;">CHECK<span style="color:var(--acid);">OUT</span></h2>
+        
+        <form id="checkout-form">
+          <div style="background:var(--s1); border:1px solid var(--border); border-radius:14px; padding:2rem; margin-bottom:2rem;">
+            <h3 style="font-family:var(--fd); font-size:1.5rem; margin-bottom:1rem; letter-spacing:0.04em;">1. SHIPPING DETAILS</h3>
+            <div class="form-row2">
+              <div><label class="form-lbl">First Name</label><input class="form-ctrl" required placeholder="Aarav"></div>
+              <div><label class="form-lbl">Last Name</label><input class="form-ctrl" required placeholder="Shah"></div>
+            </div>
+            <label class="form-lbl">Address</label><input class="form-ctrl" required placeholder="Street address or P.O. Box">
+            <div class="form-row2">
+              <div><label class="form-lbl">City</label><input class="form-ctrl" required placeholder="Mumbai"></div>
+              <div><label class="form-lbl">Postal Code</label><input class="form-ctrl" required placeholder="400050"></div>
+            </div>
+          </div>
+
+          <div style="background:var(--s1); border:1px solid var(--border); border-radius:14px; padding:2rem; margin-bottom:2rem;">
+            <h3 style="font-family:var(--fd); font-size:1.5rem; margin-bottom:1rem; letter-spacing:0.04em;">2. PAYMENT METHOD</h3>
+            <div style="padding:1rem; border:1px solid var(--acid); border-radius:8px; background:rgba(200,255,0,0.05); margin-bottom:1rem; display:flex; align-items:center;">
+              <input type="radio" checked style="margin-right:0.8rem;"> <span style="font-family:var(--fu); font-size:0.9rem;">Credit / Debit Card</span>
+            </div>
+            <label class="form-lbl">Card Number</label><input class="form-ctrl" placeholder="1234 5678 9101 1121">
+            <div class="form-row2">
+              <div><label class="form-lbl">Expiry</label><input class="form-ctrl" placeholder="MM/YY"></div>
+              <div><label class="form-lbl">CVV</label><input class="form-ctrl" placeholder="123"></div>
+            </div>
+          </div>
+          
+          <button class="checkout-cta" id="place-order-btn" type="submit" style="padding:1.2rem; font-size:1rem; width:100%;">PLACE SECURE ORDER</button>
+        </form>
+      </div>
+      
+      <div class="col-lg-4">
+        <div style="background:var(--s1); border:1px solid var(--border); border-radius:14px; padding:2rem; position:sticky; top:100px;">
+          <h3 style="font-family:var(--fd); font-size:1.5rem; margin-bottom:1.5rem; letter-spacing:0.04em;">BAG SUMMARY</h3>
+          <div id="checkout-summary-items" style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+            <!-- Rendered by JS -->
+          </div>
+          <div style="border-top:1px solid var(--border); padding-top:1.5rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.8rem; font-family:var(--fu); font-size:0.9rem;">
+              <span style="color:var(--muted)">Subtotal</span>
+              <span id="checkout-subtotal">₹0</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-family:var(--fu); font-size:0.9rem;">
+              <span style="color:var(--muted)">Shipping</span>
+              <span style="color:var(--acid)">Free</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:1rem;">
+              <span style="font-family:var(--fu); font-weight:700; font-size:1.1rem;">Total</span>
+              <span id="checkout-total" style="font-family:var(--fd); font-size:2rem; color:var(--acid);">₹0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="wv-footer"><div class="footer-bottom"><div class="footer-copy">© 2025 WEARVIO.</div><div class="footer-legal"><a onclick="showPage('home')">Home</a></div></div></footer>
 </div>
 
 <!-- ════════════════════════════════════════════

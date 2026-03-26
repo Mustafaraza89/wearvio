@@ -449,12 +449,12 @@
           tag +
           "</div>" +
           '<div class="wish-btn" onclick="toggleWish(this)">♡</div>' +
-          '<div class="prod-img-wrap">' +
+          '<div class="prod-img-wrap" style="cursor:pointer;" onclick="openProductPage(\'' + product.id + '\')">' +
           '<img src="' +
           escapeHtml(product.image_url) +
           '" alt="' +
           escapeHtml(product.name) +
-          '" loading="lazy" onerror="this.parentElement.style.background=\'#1a1a2e\';this.style.display=\'none\'">' +
+          '" loading="lazy" onerror="this.onerror=null;this.src=\'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&q=80&fit=crop\';">' +
           "</div>" +
           '<div class="prod-info">' +
           '<div class="prod-brand">' +
@@ -712,15 +712,13 @@
     }
 
     if (state.user) {
-      button.textContent = "Sign Out";
-      button.onclick = async function () {
-        if (state.supabase) {
-          await state.supabase.auth.signOut();
-        }
-        state.user = null;
-        updateAuthButton();
-        showToast("Signed out");
-        showPage("home");
+      button.textContent = "Profile";
+      button.onclick = function () {
+        const nameFallback = (state.user.user_metadata && state.user.user_metadata.full_name) || state.user.email.split('@')[0];
+        document.getElementById("profile-name").textContent = nameFallback;
+        document.getElementById("profile-email").textContent = state.user.email;
+        document.getElementById("profile-initials").textContent = nameFallback.charAt(0).toUpperCase();
+        showPage("profile");
       };
       return;
     }
@@ -729,6 +727,16 @@
     button.onclick = function () {
       showPage("login");
     };
+  }
+
+  async function handleSignOut() {
+    if (state.supabase) {
+      await state.supabase.auth.signOut();
+    }
+    state.user = null;
+    updateAuthButton();
+    showToast("Signed out successfully");
+    showPage("home");
   }
 
   async function initSupabase() {
@@ -849,7 +857,7 @@
     }
   }
 
-  async function handleCheckout() {
+  function handleCheckout() {
     if (!state.cart.length) {
       showToast("Your bag is empty");
       return;
@@ -857,20 +865,44 @@
 
     if (!state.supabase || !state.user) {
       showPage("login");
-      showToast("Order place karne ke liye pehle sign in karein");
+      showToast("Sign in first to securely place your order");
       return;
     }
 
+    const summaryList = document.getElementById("checkout-summary-items");
+    if (summaryList) {
+      summaryList.innerHTML = state.cart.map((item) => {
+        return '<div style="display:flex; gap:1rem; align-items:center;">' +
+          '<img src="' + escapeHtml(item.image_url) + '" style="width:50px; height:60px; object-fit:cover; border-radius:6px; background:#111;">' +
+          '<div style="flex:1;">' +
+            '<div style="font-family:var(--fu); font-size:0.8rem; font-weight:600;">' + escapeHtml(item.name) + '</div>' +
+            '<div style="color:var(--muted); font-size:0.75rem;">Qty: ' + item.qty + '</div>' +
+          '</div>' +
+          '<div style="font-family:var(--fd); font-size:1.1rem;">₹' + (item.price * item.qty).toLocaleString("en-IN") + '</div>' +
+        '</div>';
+      }).join('');
+    }
+    
+    const totalAmount = state.cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const subtotalEl = document.getElementById("checkout-subtotal");
+    const totalEl = document.getElementById("checkout-total");
+    if (subtotalEl) subtotalEl.textContent = "₹" + totalAmount.toLocaleString("en-IN");
+    if (totalEl) totalEl.textContent = "₹" + totalAmount.toLocaleString("en-IN");
+
+    toggleCart(false);
+    showPage("checkout");
+  }
+
+  async function submitOrder(event) {
+    event.preventDefault();
+    if (!state.cart.length) return;
+
+    const button = document.getElementById("place-order-btn");
     try {
+      setButtonLoading(button, true, "PROCESSING...");
       const sessionResult = await state.supabase.auth.getSession();
       const session = sessionResult.data.session;
-
-      if (!session) {
-        showPage("login");
-        showToast("Session expired. Please sign in again.");
-        return;
-      }
-
+      
       const response = await fetch("/api/public/checkout", {
         method: "POST",
         headers: {
@@ -886,17 +918,18 @@
       });
 
       const payload = await response.json();
-      if (!response.ok || !payload.ok) {
-        throw new Error(payload.message || "Checkout failed");
-      }
+      if (!response.ok || !payload.ok) throw new Error(payload.message || "Checkout failed");
 
       state.cart = [];
       updateCart();
-      toggleCart(false);
-      showToast("Order placed successfully");
+      document.getElementById("checkout-form").reset();
+      showToast("Order placed successfully! Keep an eye on your email.");
+      showPage("home");
       loadStorefront();
     } catch (error) {
-      showToast(error.message || "Checkout failed");
+      showToast(error.message || "Payment verification failed");
+    } finally {
+      if(button) setButtonLoading(button, false, "");
     }
   }
 
@@ -1019,6 +1052,7 @@
     const newsletterForm = document.getElementById("newsletter-form");
     const contactForm = document.getElementById("contact-form");
     const checkoutButton = document.getElementById("checkout-btn");
+    const checkoutForm = document.getElementById("checkout-form");
 
     if (loginForm) {
       loginForm.addEventListener("submit", handleLoginSubmit);
@@ -1039,6 +1073,45 @@
     if (checkoutButton) {
       checkoutButton.addEventListener("click", handleCheckout);
     }
+    
+    if (checkoutForm) {
+      checkoutForm.addEventListener("submit", submitOrder);
+    }
+  }
+
+  function openProductPage(productId) {
+    const product = state.products.find((item) => item.id === String(productId));
+    if (!product) return;
+    
+    document.getElementById('pdp-img').src = product.image_url;
+    document.getElementById('pdp-brand').textContent = product.brand;
+    document.getElementById('pdp-title').textContent = product.name;
+    document.getElementById('pdp-price').textContent = "₹" + Number(product.price).toLocaleString("en-IN");
+    document.getElementById('pdp-desc').textContent = product.description || "The ultimate drip element. Add this to your collection before it sells out. Limited stock available.";
+    
+    const sizesContainer = document.getElementById('pdp-sizes');
+    if (product.sizes && product.sizes.length > 0) {
+       sizesContainer.innerHTML = product.sizes.map((sz) => '<div class="sz" style="width:40px;height:40px;font-size:0.8rem;">' + escapeHtml(sz) + '</div>').join('');
+    } else {
+       sizesContainer.innerHTML = '<div style="color:var(--muted); font-size:0.8rem;">One Size</div>';
+    }
+
+    const addBtn = document.getElementById('pdp-add-btn');
+    if (product.quantity <= 0) {
+      addBtn.textContent = 'OUT OF STOCK';
+      addBtn.disabled = true;
+      addBtn.style.background = 'rgba(255,255,255,0.1)';
+      addBtn.style.color = 'rgba(255,255,255,0.4)';
+      addBtn.onclick = null;
+    } else {
+      addBtn.textContent = 'ADD TO BAG';
+      addBtn.disabled = false;
+      addBtn.style.background = 'var(--acid)';
+      addBtn.style.color = '#000';
+      addBtn.onclick = function() { addToCart(product.id); };
+    }
+
+    showPage('product');
   }
 
   function init() {
@@ -1063,6 +1136,8 @@
   window.sendAI = sendAI;
   window.sendAIInput = sendAIInput;
   window.toggleTopic = toggleTopic;
+  window.handleSignOut = handleSignOut;
+  window.openProductPage = openProductPage;
 
   init();
 })();
