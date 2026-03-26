@@ -448,7 +448,7 @@
           '<div class="prod-tags">' +
           tag +
           "</div>" +
-          '<div class="wish-btn" onclick="toggleWish(this)">♡</div>' +
+          '<div class="wish-btn" onclick="event.stopPropagation(); toggleWish(this)">♡</div>' +
           '<div class="prod-img-wrap" style="cursor:pointer;" onclick="openProductPage(\'' + product.id + '\')">' +
           '<img src="' +
           escapeHtml(product.image_url) +
@@ -472,9 +472,9 @@
           " ₹" +
           Number(product.price).toLocaleString("en-IN") +
           "</div>" +
-          '<button class="add-btn" onclick="addToCart(\'' +
+          '<button class="add-btn" onclick="event.stopPropagation(); addToCart(\'' +
           product.id +
-          '\')"' +
+          '\', \'' + escapeHtml((product.sizes && product.sizes.length > 0) ? product.sizes[0] : "One Size") + '\')"' +
           disabled +
           ">" +
           buttonLabel +
@@ -541,12 +541,12 @@
           escapeHtml(item.image_url) +
           '" alt="' +
           escapeHtml(item.name) +
-          '" style="width:100%;height:100%;object-fit:cover;"></div>' +
+          '" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src=\'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200&q=80&fit=crop\';"></div>' +
           '<div style="flex:1;min-width:0;">' +
           '<div class="ci-name">' +
           escapeHtml(item.name) +
           "</div>" +
-          '<div class="ci-sz">Qty linked to live stock · ' +
+          '<div class="ci-sz">Size: ' + escapeHtml(item.size || "One Size") + ' · ' +
           escapeHtml(item.brand) +
           "</div>" +
           "</div>" +
@@ -574,7 +574,7 @@
     persistCart();
   }
 
-  function addToCart(productId) {
+  function addToCart(productId, sizeStr = null) {
     const product = state.products.find((item) => item.id === String(productId));
     if (!product) {
       showToast("Product not found");
@@ -586,7 +586,9 @@
       return;
     }
 
-    const existing = state.cart.find((item) => item.product_id === product.id);
+    const selectedSize = sizeStr || ((product.sizes && product.sizes.length > 0) ? product.sizes[0] : "One Size");
+    const existing = state.cart.find((item) => item.product_id === product.id && item.size === selectedSize);
+    
     if (existing) {
       existing.qty += 1;
     } else {
@@ -596,7 +598,8 @@
         brand: product.brand,
         price: product.price,
         image_url: product.image_url,
-        qty: 1
+        qty: 1,
+        size: selectedSize
       });
     }
 
@@ -873,10 +876,10 @@
     if (summaryList) {
       summaryList.innerHTML = state.cart.map((item) => {
         return '<div style="display:flex; gap:1rem; align-items:center;">' +
-          '<img src="' + escapeHtml(item.image_url) + '" style="width:50px; height:60px; object-fit:cover; border-radius:6px; background:#111;">' +
+          '<img src="' + escapeHtml(item.image_url) + '" style="width:50px; height:60px; object-fit:cover; border-radius:6px; background:#111;" onerror="this.onerror=null;this.src=\'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200&q=80&fit=crop\';">' +
           '<div style="flex:1;">' +
             '<div style="font-family:var(--fu); font-size:0.8rem; font-weight:600;">' + escapeHtml(item.name) + '</div>' +
-            '<div style="color:var(--muted); font-size:0.75rem;">Qty: ' + item.qty + '</div>' +
+            '<div style="color:var(--muted); font-size:0.75rem;">Size: ' + escapeHtml(item.size || "One Size") + ' | Qty: ' + item.qty + '</div>' +
           '</div>' +
           '<div style="font-family:var(--fd); font-size:1.1rem;">₹' + (item.price * item.qty).toLocaleString("en-IN") + '</div>' +
         '</div>';
@@ -1083,7 +1086,13 @@
     const product = state.products.find((item) => item.id === String(productId));
     if (!product) return;
     
-    document.getElementById('pdp-img').src = product.image_url;
+    const imgEl = document.getElementById('pdp-img');
+    imgEl.onerror = function() {
+       this.onerror = null;
+       this.src = 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=800&q=80&fit=crop';
+    };
+    imgEl.src = product.image_url;
+    
     document.getElementById('pdp-brand').textContent = product.brand;
     document.getElementById('pdp-title').textContent = product.name;
     document.getElementById('pdp-price').textContent = "₹" + Number(product.price).toLocaleString("en-IN");
@@ -1091,9 +1100,9 @@
     
     const sizesContainer = document.getElementById('pdp-sizes');
     if (product.sizes && product.sizes.length > 0) {
-       sizesContainer.innerHTML = product.sizes.map((sz) => '<div class="sz" style="width:40px;height:40px;font-size:0.8rem;">' + escapeHtml(sz) + '</div>').join('');
+       sizesContainer.innerHTML = product.sizes.map((sz) => '<div class="sz" style="width:40px;height:40px;font-size:0.8rem;cursor:pointer;" onclick="selectPDPSize(this, \'' + escapeHtml(sz) + '\')">' + escapeHtml(sz) + '</div>').join('');
     } else {
-       sizesContainer.innerHTML = '<div style="color:var(--muted); font-size:0.8rem;">One Size</div>';
+       sizesContainer.innerHTML = '<div class="sz active-sz" data-size="One Size" style="width:auto;padding:0 1rem;height:40px;font-size:0.8rem; border-color:var(--acid); color:var(--acid); background:rgba(200,255,0,0.07);">One Size</div>';
     }
 
     const addBtn = document.getElementById('pdp-add-btn');
@@ -1108,11 +1117,34 @@
       addBtn.disabled = false;
       addBtn.style.background = 'var(--acid)';
       addBtn.style.color = '#000';
-      addBtn.onclick = function() { addToCart(product.id); };
+      addBtn.onclick = function() { 
+          const activeSz = document.querySelector('#pdp-sizes .active-sz');
+          if (product.sizes && product.sizes.length > 0 && !activeSz) {
+              showToast("Please select a size");
+              return;
+          }
+          const selectedSize = activeSz ? activeSz.dataset.size || activeSz.innerText : "One Size";
+          addToCart(product.id, selectedSize); 
+      };
     }
 
     showPage('product');
   }
+
+  window.selectPDPSize = function(element, size) {
+      const container = document.getElementById('pdp-sizes');
+      container.querySelectorAll('.sz').forEach((el) => {
+          el.style.borderColor = 'var(--border)';
+          el.style.color = 'rgba(245,242,238,.36)';
+          el.style.background = 'rgba(255,255,255,.04)';
+          el.classList.remove('active-sz');
+      });
+      element.style.borderColor = 'var(--acid)';
+      element.style.color = 'var(--acid)';
+      element.style.background = 'rgba(200,255,0,.07)';
+      element.classList.add('active-sz');
+      element.dataset.size = size;
+  };
 
   function init() {
     initCursor();
@@ -1138,6 +1170,7 @@
   window.toggleTopic = toggleTopic;
   window.handleSignOut = handleSignOut;
   window.openProductPage = openProductPage;
+  window.selectPDPSize = selectPDPSize;
 
   init();
 })();
