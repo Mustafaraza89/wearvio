@@ -565,6 +565,9 @@
           index +
           ',1)">+</button>' +
           "</div>" +
+          '<button type="button" onclick="removeFromCart(' +
+          index +
+          ')" style="background:none;border:none;color:rgba(245,242,238,.62);font-family:var(--fu);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:0;">Remove</button>' +
           "</div>" +
           "</div>"
         );
@@ -575,7 +578,8 @@
   }
 
   function addToCart(productId, sizeStr = null) {
-    const product = state.products.find((item) => item.id === String(productId));
+    const normalizedProductId = String(productId);
+    const product = state.products.find((item) => String(item.id) === normalizedProductId);
     if (!product) {
       showToast("Product not found");
       return;
@@ -587,13 +591,15 @@
     }
 
     const selectedSize = sizeStr || ((product.sizes && product.sizes.length > 0) ? product.sizes[0] : "One Size");
-    const existing = state.cart.find((item) => item.product_id === product.id && item.size === selectedSize);
+    const existing = state.cart.find(
+      (item) => String(item.product_id) === normalizedProductId && item.size === selectedSize
+    );
     
     if (existing) {
       existing.qty += 1;
     } else {
       state.cart.push({
-        product_id: product.id,
+        product_id: normalizedProductId,
         name: product.name,
         brand: product.brand,
         price: product.price,
@@ -618,6 +624,14 @@
       state.cart.splice(index, 1);
     }
 
+    updateCart();
+  }
+
+  function removeFromCart(index) {
+    if (index < 0 || index >= state.cart.length) {
+      return;
+    }
+    state.cart.splice(index, 1);
     updateCart();
   }
 
@@ -1162,6 +1176,7 @@
   window.filterCat = filterCat;
   window.addToCart = addToCart;
   window.changeQty = changeQty;
+  window.removeFromCart = removeFromCart;
   window.toggleCart = toggleCart;
   window.toggleWish = toggleWish;
   window.toggleAI = toggleAI;
